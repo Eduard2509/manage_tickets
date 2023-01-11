@@ -5,6 +5,7 @@ import com.example.manage_tickets.model.Post;
 import com.example.manage_tickets.model.Ticket;
 import com.example.manage_tickets.repository.JourneyRepository;
 import com.example.manage_tickets.repository.TicketRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +27,6 @@ class BuyTicketServiceTest {
     TicketRepository ticketRepository;
 
     @Mock
-    RestTemplate restTemplate;
-
-    @Mock
     JourneyRepository journeyRepository;
 
     @InjectMocks
@@ -36,23 +34,14 @@ class BuyTicketServiceTest {
 
 
     @Test
-    void buyTicket_shouldCallMethodSave() {
+    void buyTicket_shouldReturnNoTickets() {
+        String noTicket = "There are no tickets";
         String name = "test";
-
         Journey journey = new Journey();
-        journey.setId("123");
-        journey.setCost(50);
-        journey.setCount(15);
-
-        Post post = mock(Post.class);
-        when(post.getStatus()).thenReturn("DONE");
-//        when(service.createPost(name, journey.getCost())).thenReturn(post);
-
-        String ticketId = service.buyTicket(name, journey.getId());
-        Ticket ticket = ticketRepository.findById(ticketId).get();
-        verify(ticketRepository).save(ticket);
-//        when(journeyRepository.findById(journey.getId())).thenReturn(Optional.of(journey));
-//        String test = service.buyTicket("test", "888");
+        journey.setCount(0);
+        when(journeyRepository.findById(journey.getId())).thenReturn(Optional.of(journey));
+        String buyTicket = service.buyTicket(name, journey.getId());
+        Assertions.assertEquals(noTicket, buyTicket);
     }
 
     @Test
@@ -60,13 +49,10 @@ class BuyTicketServiceTest {
         Journey journey = new Journey();
         journey.setCount(15);
         journey.setCost(50);
-
         Ticket ticket = mock(Ticket.class);
         when(ticket.getJourney()).thenReturn(journey);
         when(ticket.getStatus()).thenReturn("FAILED");
-
         service.checkStatusPayment(ticket);
-
         verify(ticketRepository).save(ticket);
     }
 }
